@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manage Restaurants{% endblock %}
+{% block top_action %}
+<a class="btn ghost" href="{% url 'admin-dashboard' %}">Dashboard</a>
+<a class="btn ghost" href="{% url 'admin-logout' %}">Logout</a>
+{% endblock %}
+{% block content %}
+<section style="display:flex;justify-content:space-between;align-items:center">
+  <h2>Restaurants</h2>
+  <a class="btn primary" href="{% url 'admin-restaurant-create' %}">+ Add Restaurant</a>
+  </section>
+<div class="grid cards">
+  {% for r in restos %}
+  <div class="card">
+    <div class="thumb" style="background-image:url('{% if r.thumbnail %}{{ r.thumbnail.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}');"></div>
+    <div class="card-body">
+      <div class="card-title">{{ r.name }}</div>
+      <div class="muted">{{ r.location }} • {{ r.category }}</div>
+      <div style="margin-top:10px">
+        <a class="btn" href="{% url 'admin-restaurant-edit' r.id %}">Edit</a>
+        <a class="btn" href="{% url 'admin-restaurant-images' r.id %}">Gallery</a>
+        <form style="display:inline" method="post" action="{% url 'admin-restaurant-delete' r.id %}">{% csrf_token %}<button class="btn" type="submit">Delete</button></form>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="muted">No restaurants.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+

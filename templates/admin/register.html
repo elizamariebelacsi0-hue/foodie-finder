@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Admin Setup{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <h1>Create Admin</h1>
+  <form action="" method="post" autocomplete="off">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div>
+        <label for="first_name">First name</label>
+        <input id="first_name" type="text" name="first_name" required>
+      </div>
+      <div>
+        <label for="last_name">Last name</label>
+        <input id="last_name" type="text" name="last_name" required>
+      </div>
+      <div class="full">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" required>
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" required>
+      </div>
+      <div>
+        <label for="confirm_password">Confirm password</label>
+        <input id="confirm_password" type="password" name="confirm_password" required>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:14px">
+      <button class="btn primary" type="submit">Create Admin</button>
+      <a class="btn" href="{% url 'admin-login' %}">Back to login</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+

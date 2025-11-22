@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Advertisement{% endblock %}
+{% block top_action %}<button class="btn ghost" onclick="goBack()">Back</button>{% endblock %}
+{% block content %}
+<section style="max-width:800px;margin:0 auto;text-align:center;padding:40px 20px;">
+  <h1 style="font-size:40px;margin-bottom:30px;background:linear-gradient(135deg,var(--primary),var(--accent-600));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Foodie Finder Advertisement</h1>
+  
+  <div style="background:white;padding:40px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.1);margin-bottom:30px;">
+    <video controls style="max-width:100%;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,0.15);">
+      <source src="{% static 'img/vid.mp4' %}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  
+  <p style="font-size:18px;color:var(--muted);line-height:1.6;">
+    Watch our promotional video to discover how Foodie Finder makes it easy to find and enjoy the best local restaurants in Naval Proper.
+  </p>
+</section>
+{% endblock %}

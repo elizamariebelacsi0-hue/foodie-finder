@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ term }} Results{% endblock %}
+{% block top_action %}
+<a class="btn ghost" href="{% url 'logout' %}">Logout</a>
+{% endblock %}
+{% block content %}
+<section class="hero" style="padding-bottom:20px">
+    <h1>{{ term|title }} Results</h1>
+    <p>Restaurants offering {{ term|lower }} in Naval Proper</p>
+</section>
+
+<section>
+    {% if restaurants_with_dishes %}
+        <h2>Found {{ restaurants_with_dishes|length }} restaurant{{ restaurants_with_dishes|length|pluralize }} offering {{ term|lower }}</h2>
+        
+        {% for item in restaurants_with_dishes %}
+        <div class="card results-card">
+            <!-- Restaurant Header -->
+            <div class="results-header">
+                <div class="results-header-inner">
+                    {% if item.restaurant.thumbnail %}
+                    <img src="{{ item.restaurant.thumbnail.url }}" alt="{{ item.restaurant.name }}" class="results-logo">
+                    {% else %}
+                    <div class="results-logo-placeholder">
+                        <i class="fas fa-store fa-2x"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h3>{{ item.restaurant.name }}</h3>
+                        <p class="muted"><i class="fas fa-map-marker-alt"></i> {{ item.restaurant.location }}</p>
+                        <div class="results-meta">
+                            <span class="results-chip">
+                                {{ item.restaurant.category }}
+                            </span>
+                            {% if item.restaurant.is_open_now %}
+                            <span class="results-chip results-open">
+                                <i class="fas fa-clock"></i> Open Now
+                            </span>
+                            {% else %}
+                            <span class="results-chip results-closed">
+                                <i class="fas fa-clock"></i> Closed
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Restaurant Dishes -->
+            <div class="card-body results-body">
+                <h4 class="results-section-title">
+                    <i class="fas fa-utensils"></i> {{ term|title }} Menu
+                </h4>
+                <div class="results-dish-grid">
+                    {% for dish in item.dishes|slice:":4" %}
+                    <div class="results-dish-card">
+                        <div class="results-dish-header">
+                            <div>
+                                <h5>{{ dish.name }}</h5>
+                                <div class="muted" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                    {% if dish.servings.all %}
+                                        {% with servings=dish.servings.all|dictsort:"price" %}
+                                            {% if servings|length == 1 %}
+                                                <span class="results-price-pill">
+                                                    ₱{{ servings.0.price }}
+                                                </span>
+                                            {% else %}
+                                                <span class="results-price-pill">
+                                                    {% for serving in servings %}
+                                                      {% if forloop.first %}
+                                                        ₱{{ serving.price }} - 
+                                                      {% elif forloop.last %}
+                                                        ₱{{ serving.price }}
+                                                      {% endif %}
+                                                    {% endfor %}
+                                                </span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="results-price-pill results-price-pill-alt">
+                                            Price TBA
+                                        </span>
+                                    {% endif %}
+                                    <span class="results-price-tier">
+                                        {{ dish.price_tier }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- View Restaurant Button -->
+                <div class="results-menu-more" style="margin-top:20px;text-align:center;">
+                    <a href="{% url 'restaurant-detail' item.restaurant.pk %}" class="btn primary" style="display:inline-flex;align-items:center;gap:8px;">
+                        <i class="fas fa-eye"></i> View Full Restaurant
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+    {% else %}
+        <div class="results-empty">
+            <i class="fas fa-search fa-3x" style="color: #ccc; margin-bottom: 20px;"></i>
+            <h3 style="color: #666;">No restaurants found for "{{ term }}"</h3>
+            <p style="color: #999;">Try searching for different categories like breakfast, lunch, dinner, snack, or drinks.</p>
+            <a href="{% url 'main' %}" class="btn primary" style="margin-top: 20px;">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+        </div>
+    {% endif %}
+</section>
+
+<style>
+.grid > div:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 71, 73, 0.2);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodie Finder - {% block title %}{% endblock %}</title>
+    <link rel="icon" href="/static/img/LOGO.png" sizes="32x32">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #F54749 0%, #FFB703 100%);
+        }
+        .sidebar .nav-link {
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 5px 10px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .main-content {
+            background: url('/static/img/background.jpg') center/cover no-repeat, #f8f9fa;
+            min-height: 100vh;
+        }
+        .restaurant-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #F54749 0%, #FFB703 100%);
+            color: white;
+        }
+        .back-btn {
+            background: linear-gradient(135deg, #F54749 0%, #FFB703 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245, 71, 73, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background: linear-gradient(135deg, #e53e3e 0%, #F54749 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 71, 73, 0.6);
+            color: white;
+        }
+        .back-btn:active {
+            transform: translateY(0);
+        }
+        .sidebar-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+        .featured-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .featured-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="p-3 text-center">
+                    <img src="/static/img/LOGO.png" alt="Foodie Finder" class="sidebar-logo">
+                    <h2 class="text-white mb-4"><i class="fas fa-store"></i> Restaurant</h2>
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="{% url 'restaurant-dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        <a class="nav-link" href="{% url 'restaurant-edit' %}"><i class="fas fa-edit"></i> Edit Restaurant</a>
+                        <a class="nav-link" href="{% url 'restaurant-dishes' %}"><i class="fas fa-utensils"></i> Manage Dishes</a>
+                        <a class="nav-link" href="{% url 'restaurant-menu-categories' %}"><i class="fas fa-list"></i> Menu Categories</a>
+                        <a class="nav-link" href="{% url 'restaurant-images' %}"><i class="fas fa-images"></i> Manage Images</a>
+                        <hr class="text-white">
+                        <a class="nav-link" href="{% url 'main' %}"><i class="fas fa-globe"></i> View Site</a>
+                        <a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <div class="p-4">
+                    <div class="d-flex justify-content-end mb-3 gap-2">
+                        <a href="{% url 'about' %}" class="btn btn-outline-secondary"><i class="fas fa-info-circle"></i> About</a>
+                        <button type="button" class="back-btn" onclick="window.history.back()"><i class="fas fa-arrow-left"></i> Back</button>
+                    </div>
+                    <h2 class="mb-4">Welcome, {{ restaurant.name }}!</h2>
+                    
+                    <!-- Restaurant Info Card -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card restaurant-card">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3">
+                                            {% if restaurant.thumbnail %}
+                                            <img src="{{ restaurant.thumbnail.url }}" alt="{{ restaurant.name }}" class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px;">
+                                                <i class="fas fa-store fa-3x text-muted"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-9">
+                                            <h3>{{ restaurant.name }}</h3>
+                                            <p class="mb-2"><i class="fas fa-map-marker-alt"></i> {{ restaurant.location }}</p>
+                                            <p class="mb-2"><i class="fas fa-tag"></i> {{ restaurant.category }}</p>
+                                            <p class="mb-2"><i class="fas fa-clock"></i> {{ restaurant.open_time }} - {{ restaurant.close_time }}</p>
+                                            <div class="mt-3">
+                                                <a href="{% url 'restaurant-edit' %}" class="btn btn-light"><i class="fas fa-edit"></i> Edit Details</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-utensils fa-2x text-primary mb-2"></i>
+                                    <h5>Manage Dishes</h5>
+                                    <a href="{% url 'restaurant-dishes' %}" class="btn btn-primary">View Dishes</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-images fa-2x text-success mb-2"></i>
+                                    <h5>Manage Images</h5>
+                                    <a href="{% url 'restaurant-images' %}" class="btn btn-success">View Images</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-plus fa-2x text-warning mb-2"></i>
+                                    <h5>Add Dish</h5>
+                                    <a href="{% url 'restaurant-dish-create' %}" class="btn btn-warning">Add New</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-upload fa-2x text-info mb-2"></i>
+                                    <h5>Add Images</h5>
+                                    <a href="{% url 'restaurant-images-add' %}" class="btn btn-info">Upload</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map Location Editor -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Set Restaurant Location</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted">Click on the map to set your restaurant's exact location</p>
+                                    <div id="locationMap" style="height: 400px; border-radius: 8px;"></div>
+                                    <div class="mt-3">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Latitude:</label>
+                                                <input type="text" id="currentLat" class="form-control" readonly>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Longitude:</label>
+                                                <input type="text" id="currentLng" class="form-control" readonly>
+                                            </div>
+                                        </div>
+                                        <button id="saveLocation" class="btn btn-success mt-3">
+                                            <i class="fas fa-save"></i> Save Location
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% comment %} <!-- Featured Restaurants (What users see) -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h4 class="mb-3">Featured Restaurants (User View)</h4>
+                            <div class="row">
+                                {% for resto in featured %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card featured-card">
+                                        {% if resto.thumbnail %}
+                                        <img src="{{ resto.thumbnail.url }}" class="card-img-top" alt="{{ resto.name }}" style="height: 200px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ resto.name }}</h5>
+                                            <p class="card-text">
+                                                <small class="text-muted">{{ resto.category }} • {{ resto.location }}</small>
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-secondary">{{ resto.category }}</span>
+                                                {% if resto.is_open_now %}
+                                                <span class="badge bg-success">Open</span>
+                                                {% else %}
+                                                <span class="badge bg-danger">Closed</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="col-12">
+                                    <p class="text-muted">No featured restaurants available.</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> {% endcomment %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    // Map for location editing
+    const currentLat = {{ restaurant.latitude|default:"11.5564" }};
+    const currentLng = {{ restaurant.longitude|default:"124.2595" }};
+    
+    const locationMap = L.map('locationMap').setView([currentLat, currentLng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(locationMap);
+    
+    let locationMarker = L.marker([currentLat, currentLng], {draggable: true}).addTo(locationMap);
+    
+    // Update coordinate displays
+    function updateCoordinates(lat, lng) {
+        document.getElementById('currentLat').value = lat.toFixed(6);
+        document.getElementById('currentLng').value = lng.toFixed(6);
+    }
+    
+    // Initialize coordinates
+    updateCoordinates(currentLat, currentLng);
+    
+    // Handle marker drag
+    locationMarker.on('dragend', function(e) {
+        const pos = e.target.getLatLng();
+        updateCoordinates(pos.lat, pos.lng);
+    });
+    
+    // Handle map click
+    locationMap.on('click', function(e) {
+        locationMarker.setLatLng(e.latlng);
+        updateCoordinates(e.latlng.lat, e.latlng.lng);
+    });
+    
+    // Save location
+    document.getElementById('saveLocation').addEventListener('click', function() {
+        const lat = document.getElementById('currentLat').value;
+        const lng = document.getElementById('currentLng').value;
+        
+        fetch('{% url "restaurant-update-location" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({latitude: lat, longitude: lng})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Location updated successfully!');
+            } else {
+                alert('Error updating location');
+            }
+        });
+    });
+    </script>
+</body>
+</html>

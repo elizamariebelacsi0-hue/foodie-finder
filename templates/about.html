@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}About{% endblock %}
+{% block top_action %}<button class="btn ghost" onclick="goBack()">Back</button>{% endblock %}
+{% block content %}
+<section style="max-width:700px;margin:0 auto">
+  <h1 style="font-size:40px;margin-bottom:20px;background:linear-gradient(135deg,var(--primary),var(--accent-600));-webkit-background-clip:text;-webkit-text-fill-color:transparent">About Foodie Finder</h1>
+  <p style="font-size:18px;line-height:1.8;margin-bottom:24px;color:var(--text)">Foodie Finder connects hungry people to great local spots in Naval Proper. We curate featured places and make it effortless to search what you crave—then show you where to get it now.</p>
+  <div style="background:linear-gradient(135deg,#fff7ed,#fff4cc);padding:24px;border-radius:16px;margin:24px 0;box-shadow:var(--shadow)">
+    <h2 style="margin-bottom:16px;font-size:22px;color:#c2410c">What We Offer</h2>
+    <ul style="list-style:none;padding:0;line-height:2.2">
+      <li style="font-size:16px;padding:8px 0">🍔 <strong>Quick filters</strong> by category like Fast Food, Seafood, Dessert</li>
+      <li style="font-size:16px;padding:8px 0">⏰ <strong>Real-time status</strong> - See whether a place is open now</li>
+      <li style="font-size:16px;padding:8px 0">💸 <strong>Price badges</strong> to gauge affordability at a glance</li>
+    </ul>
+  </div>
+  <p style="font-size:16px;line-height:1.8;color:var(--muted)">Built with love to support small businesses and help you discover your next favorite bite.</p>
+  
+  <div style="margin-top:40px;text-align:center">
+    <h2 style="color:var(--primary);margin-bottom:20px;font-size:28px">Logo and Ads Corner</h2>
+    <div style="display:flex;justify-content:center;gap:20px;margin-bottom:30px;flex-wrap:wrap">
+      <a href="{% url 'logo-page' %}" style="background:linear-gradient(135deg,var(--primary),var(--accent-600));color:white;padding:12px 24px;border-radius:25px;text-decoration:none;font-weight:600;transition:transform 0.3s ease" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">📷 Logo</a>
+      <a href="{% url 'poster-page' %}" style="background:linear-gradient(135deg,#16a34a,#15803d);color:white;padding:12px 24px;border-radius:25px;text-decoration:none;font-weight:600;transition:transform 0.3s ease" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">🖼️ Poster</a>
+      <a href="{% url 'advertisement-page' %}" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;padding:12px 24px;border-radius:25px;text-decoration:none;font-weight:600;transition:transform 0.3s ease" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">🎬 Advertisement</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

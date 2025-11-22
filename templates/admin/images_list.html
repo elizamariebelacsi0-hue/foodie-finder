@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Gallery - {{ resto.name }}{% endblock %}
+{% block top_action %}
+<a class="btn ghost" href="{% url 'admin-restaurant-list' %}">Back</a>
+<a class="btn ghost" href="{% url 'admin-logout' %}">Logout</a>
+{% endblock %}
+{% block content %}
+<section style="display:flex;justify-content:space-between;align-items:center">
+  <h2>{{ resto.name }} • Gallery</h2>
+  <a class="btn primary" href="{% url 'admin-restaurant-images-add' resto.id %}">+ Upload Images</a>
+</section>
+
+<div class="grid cards">
+  {% for im in images %}
+  <div class="card">
+    <div class="thumb" style="background-image:url('{{ im.image.url }}'); height:200px"></div>
+    <div class="card-body">
+      <form method="post" action="{% url 'admin-image-delete' im.id %}">{% csrf_token %}
+        <button class="btn" type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% empty %}
+  <p class="muted">No images yet. Upload some.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+

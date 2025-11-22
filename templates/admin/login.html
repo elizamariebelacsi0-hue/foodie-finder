@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Admin Login{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <h1>Admin Login</h1>
+  <form action="" method="post" autocomplete="off">
+    {% csrf_token %}
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email" placeholder="admin@email.com" required>
+    <label for="password">Password</label>
+    <input id="password" type="password" name="password" required>
+    <div style="display:flex;gap:12px;margin-top:14px">
+      <button class="btn primary" type="submit">Login</button>
+      <a class="btn" href="{% url 'main' %}">Back to site</a>
+    </div>
+  </form>
+  {% if allow_register %}
+  <p class="muted" style="margin-top:12px">Need another admin? <a href="{% url 'admin-register' %}">Create one</a> (max 2).</p>
+  {% endif %}
+</section>
+{% endblock %}
+

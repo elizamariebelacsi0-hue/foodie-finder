@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block top_action %}{% endblock %}
+{% block content %}
+<section class="auth-card">
+    <h1>Create your account</h1>
+    <form method="post" class="form-grid">
+        {% csrf_token %}
+        <div>
+            <label>First Name</label>
+            <div class="input-group">
+                <i class="fa-solid fa-user input-icon"></i>
+                <input type="text" name="first_name" placeholder="Juan" required>
+            </div>
+        </div>
+        <div>
+            <label>Last Name</label>
+            <div class="input-group">
+                <i class="fa-regular fa-id-card input-icon"></i>
+                <input type="text" name="last_name" placeholder="Dela Cruz" required>
+            </div>
+        </div>
+        <div class="full">
+            <label>Contact Number</label>
+            <div class="input-group">
+                <i class="fa-solid fa-phone input-icon"></i>
+                <input type="text" name="contact_number" placeholder="09xx xxx xxxx" required>
+            </div>
+        </div>
+        <div class="full">
+            <label>Email</label>
+            <div class="input-group">
+                <i class="fa-solid fa-envelope input-icon"></i>
+                <input type="email" name="email" placeholder="you@example.com" required>
+            </div>
+        </div>
+        <div class="full">
+            <label>Account Type</label>
+            <div class="input-group">
+                <i class="fa-solid fa-briefcase input-icon"></i>
+                <select name="role" required>
+                    <option value="user">Regular User</option>
+                    <option value="restaurant">Restaurant Owner</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <label>Password</label>
+            <div class="input-group">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <input type="password" name="password" placeholder="Enter password" required>
+            </div>
+        </div>
+        <div>
+            <label>Confirm Password</label>
+            <div class="input-group">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <input type="password" name="confirm_password" placeholder="Re-enter password" required>
+            </div>
+        </div>
+        <button class="btn primary full" type="submit">Register</button>
+    </form>
+    <p class="muted">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+</section>
+{% endblock %}
+

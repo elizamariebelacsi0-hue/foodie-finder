@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Restaurant - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-bottom:10px">
+  <h1>Edit Restaurant</h1>
+  <p class="muted">Update your restaurant information</p>
+</section>
+
+<section>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              
+              <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Restaurant Name</label>
+                {{ form.name }}
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form.location.id_for_label }}" class="form-label">Location</label>
+                {{ form.location }}
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="{{ form.latitude.id_for_label }}" class="form-label">Latitude</label>
+                    {{ form.latitude }}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="{{ form.longitude.id_for_label }}" class="form-label">Longitude</label>
+                    {{ form.longitude }}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">Map Location</label>
+                <div id="editMap" style="height: 300px; border-radius: 8px;"></div>
+                <small class="text-muted">Click on the map to set your restaurant location</small>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="{{ form.open_time.id_for_label }}" class="form-label">Opening Time</label>
+                    {{ form.open_time }}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="{{ form.close_time.id_for_label }}" class="form-label">Closing Time</label>
+                    {{ form.close_time }}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                {{ form.category }}
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                {{ form.description }}
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form.thumbnail.id_for_label }}" class="form-label">Restaurant Image</label>
+                {{ form.thumbnail }}
+                {% if restaurant.thumbnail %}
+                <div class="mt-2">
+                  <img src="{{ restaurant.thumbnail.url }}" alt="Current image" class="img-thumbnail" style="max-width: 200px;">
+                </div>
+                {% endif %}
+              </div>
+              
+              <div class="mb-3 form-check">
+                {{ form.featured }}
+                <label class="form-check-label" for="{{ form.featured.id_for_label }}">
+                  Featured Restaurant
+                </label>
+              </div>
+              
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Update Restaurant</button>
+                <a href="{% url 'restaurant-dashboard' %}" class="btn btn-secondary">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const lat = {{ restaurant.latitude|default:"11.5564" }};
+const lng = {{ restaurant.longitude|default:"124.2595" }};
+const editMap = L.map('editMap').setView([lat, lng], 16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(editMap);
+
+let marker = L.marker([lat, lng], {draggable: true}).addTo(editMap);
+
+function updateCoords(latlng) {
+  document.getElementById('id_latitude').value = latlng.lat.toFixed(6);
+  document.getElementById('id_longitude').value = latlng.lng.toFixed(6);
+}
+
+marker.on('dragend', function(e) {
+  updateCoords(e.target.getLatLng());
+});
+
+editMap.on('click', function(e) {
+  marker.setLatLng(e.latlng);
+  updateCoords(e.latlng);
+});
+</script>
+{% endblock %}

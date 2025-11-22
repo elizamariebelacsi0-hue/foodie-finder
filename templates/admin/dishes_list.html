@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Manage Dishes{% endblock %}
+{% block top_action %}
+<a class="btn ghost" href="{% url 'admin-dashboard' %}">Dashboard</a>
+<a class="btn ghost" href="{% url 'admin-logout' %}">Logout</a>
+{% endblock %}
+{% block content %}
+<section style="display:flex;justify-content:space-between;align-items:center">
+  <h2>Dishes</h2>
+  <a class="btn primary" href="{% url 'admin-dish-create' %}">+ Add Dish</a>
+  </section>
+<div class="grid cards">
+  {% for d in dishes %}
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">{{ d.name }}</div>
+      <div class="muted">{{ d.restaurant.name }} • ₱{{ d.price }}</div>
+      <div style="margin-top:10px">
+        <a class="btn" href="{% url 'admin-dish-edit' d.id %}">Edit</a>
+        <form style="display:inline" method="post" action="{% url 'admin-dish-delete' d.id %}">{% csrf_token %}<button class="btn" type="submit">Delete</button></form>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="muted">No dishes.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+

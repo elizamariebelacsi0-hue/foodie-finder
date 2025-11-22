@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Results{% endblock %}
+{% block top_action %}
+<button class="btn ghost" onclick="goBack()">Back</button>
+{% endblock %}
+{% block content %}
+<h2>Search results for “{{ term }}”</h2>
+<div class="grid results">
+    {% for d in dishes %}
+    <a class="card link" href="{% url 'restaurant-detail' d.restaurant.id %}">
+        <div class="thumb square" style="background-image:url('{% if d.restaurant.thumbnail %}{{ d.restaurant.thumbnail.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}');"></div>
+        <div class="card-body">
+            <div class="card-title">{{ d.restaurant.name }}</div>
+            <div>
+                <span class="muted">{{ d.name }}</span>
+                <span class="price {{ d.price_class }}">₱{{ d.price }}</span>
+            </div>
+            <div style="margin-top:6px">
+                <span class="badge {% if d.restaurant.is_open_now %}open{% else %}closed{% endif %}">{% if d.restaurant.is_open_now %}Open Now{% else %}Closed{% endif %}</span>
+                <span class="badge">{{ d.price_tier }}</span>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <p class="muted">No dishes found.</p>
+    {% endfor %}
+    </div>
+{% endblock %}
+

@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Restaurant{% endblock %}
+{% block top_action %}
+<button class="back-btn" onclick="window.history.back()" title="Go Back">
+    <i class="fas fa-arrow-left"></i>
+    <span class="back-text">Back</span>
+</button>
+{% endblock %}
+{% block content %}
+<section class="detail">
+  <div class="detail-grid">
+    <div>
+      <div class="carousel-square" id="carousel">
+        {% for img in images %}
+        <img src="{{ img.image.url }}" class="slide {% if forloop.first %}active{% endif %}" alt="{{ restaurant.name }} image">
+        {% empty %}
+        <div class="square" style="background-image:url('{% if restaurant.thumbnail %}{{ restaurant.thumbnail.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}');"></div>
+        {% endfor %}
+        {% if images %}
+        <button class="nav prev" type="button">‹</button>
+        <button class="nav next" type="button">›</button>
+        {% endif %}
+      </div>
+    </div>
+    <div class="detail-info">
+      <h1>{{ restaurant.name }}</h1>
+      <div style="margin:6px 0 10px">
+        {% if restaurant.is_open_now %}
+          <span class="badge open">Open Now</span>
+        {% else %}
+          <span class="badge closed">Closed</span>
+        {% endif %}
+        <span class="badge cat">{% if restaurant.category == 'Fast Food' %}🍔{% elif restaurant.category == 'Seafood' %}🍤{% elif restaurant.category == 'Dessert' %}🍰{% elif restaurant.category == 'Asian' %}🍜{% elif restaurant.category == 'Diner' %}🥪{% else %}🍽️{% endif %} {{ restaurant.category }}</span>
+      </div>
+      <div class="muted">Open {{ restaurant.open_time }} - {{ restaurant.close_time }}</div>
+      {% if restaurant.description %}
+      <p class="muted" style="margin-top:8px">{{ restaurant.description }}</p>
+      {% endif %}
+      
+      <div id="map" style="height: 200px; margin: 15px 0; border-radius: 8px;"></div>
+
+      <h2 style="margin-top:18px">Menu</h2>
+      <div class="menu">
+        {% for d in restaurant.dishes.all %}
+        <div class="menu-row" onclick="showDishModal('{{ d.name|escapejs }}', '{{ d.description|escapejs }}', '{% for cat in d.categories.all %}{{ cat.name }}{% if not forloop.last %}, {% endif %}{% endfor %}', '{% if d.image %}{{ d.image.url }}{% endif %}', [{% for s in d.servings.all %}{'size': '{{ s.get_serving_size_display }}', 'price': '{{ s.price }}'}{% if not forloop.last %},{% endif %}{% endfor %}])" style="cursor: pointer;">
+          <span class="dish-name">{{ d.name }}</span>
+          <span class="price-range">
+            {% if d.servings.all %}
+              {% with servings=d.servings.all|dictsort:"price" %}
+                {% if servings|length == 1 %}
+                  ₱{{ servings.0.price }}
+                {% else %}
+                  {% for serving in servings %}
+                    {% if forloop.first %}
+                      ₱{{ serving.price }} - 
+                    {% elif forloop.last %}
+                      ₱{{ serving.price }}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
+            {% else %}
+              Price TBA
+            {% endif %}
+          </span>
+        </div>
+        {% empty %}
+        <p class="muted">Menu coming soon.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dish Modal -->
+<div id="dishModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeDishModal()">&times;</span>
+    <div class="dish-modal-header">
+      <div class="dish-image-container">
+        <img id="dishImage" src="" alt="Dish Image" style="display: none;">
+        <div id="dishImagePlaceholder" class="image-placeholder">
+          <i class="fas fa-utensils"></i>
+          <span>No Image Available</span>
+        </div>
+      </div>
+      <div class="dish-info">
+        <h2 id="dishName"></h2>
+        <div id="dishCategories" class="dish-categories"></div>
+        <p id="dishDescription" class="dish-description"></p>
+      </div>
+    </div>
+    <div class="dish-servings">
+      <h3>Available Serving Sizes</h3>
+      <div id="servingsList" class="servings-list"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const slides=[...document.querySelectorAll('#carousel .slide')];
+let idx=0;function show(i){if(slides.length===0)return;slides[idx].classList.remove('active');idx=(i+slides.length)%slides.length;slides[idx].classList.add('active');}
+document.querySelector('#carousel .prev')?.addEventListener('click',()=>show(idx-1));
+document.querySelector('#carousel .next')?.addEventListener('click',()=>show(idx+1));
+
+// Map
+const map = L.map('map').setView([{{ restaurant.latitude }}, {{ restaurant.longitude }}], 16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+L.marker([{{ restaurant.latitude }}, {{ restaurant.longitude }}]).addTo(map)
+  .bindPopup('<b>{{ restaurant.name }}</b><br>{{ restaurant.location }}').openPopup();
+
+// Dish Modal Functions
+function showDishModal(name, description, categories, imageUrl, servings) {
+  document.getElementById('dishName').textContent = name;
+  
+  // Handle multiple categories
+  const categoriesContainer = document.getElementById('dishCategories');
+  if (categories && categories.trim()) {
+    const categoryList = categories.split(', ');
+    categoriesContainer.innerHTML = categoryList.map(cat => 
+      `<span class="dish-category">${cat}</span>`
+    ).join('');
+  } else {
+    categoriesContainer.innerHTML = '<span class="dish-category">Main Dish</span>';
+  }
+  
+  // Handle dish image
+  const dishImage = document.getElementById('dishImage');
+  const imagePlaceholder = document.getElementById('dishImagePlaceholder');
+  if (imageUrl && imageUrl.trim()) {
+    dishImage.src = imageUrl;
+    dishImage.style.display = 'block';
+    imagePlaceholder.style.display = 'none';
+  } else {
+    dishImage.style.display = 'none';
+    imagePlaceholder.style.display = 'flex';
+  }
+  
+  document.getElementById('dishDescription').textContent = description || 'No description available.';
+  
+  // Handle serving sizes
+  const servingsList = document.getElementById('servingsList');
+  if (servings && servings.length > 0) {
+    servingsList.innerHTML = servings.map(serving => 
+      `<div class="serving-item">
+        <span class="serving-size">${serving.size}</span>
+        <span class="serving-price">₱${serving.price}</span>
+      </div>`
+    ).join('');
+  } else {
+    servingsList.innerHTML = '<div class="serving-item"><span>No serving sizes available</span></div>';
+  }
+  
+  document.getElementById('dishModal').style.display = 'block';
+}
+
+function closeDishModal() {
+  document.getElementById('dishModal').style.display = 'none';
+}
+
+// Close modal when clicking outside or pressing ESC
+window.onclick = function(event) {
+  const modal = document.getElementById('dishModal');
+  if (event.target === modal) {
+    closeDishModal();
+  }
+}
+
+// Close modal with ESC key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeDishModal();
+  }
+});
+</script>
+
+<style>
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+  margin: 5% auto;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 700px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  position: relative;
+  animation: modalSlideIn 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(-50px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  transition: color 0.2s;
+}
+
+.close:hover {
+  color: var(--primary);
+}
+
+#dishName {
+  color: var(--primary);
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.dish-categories {
+  margin-bottom: 15px;
+}
+
+.dish-category {
+  background: linear-gradient(135deg, #fff7ed, #ffe5cc);
+  color: #c2410c;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  margin-right: 8px;
+  margin-bottom: 5px;
+}
+
+.dish-description {
+  color: var(--text);
+  line-height: 1.6;
+  margin: 15px 0;
+  font-size: 16px;
+}
+
+.dish-price {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid #f1f5f9;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dish-price .price {
+  color: var(--green);
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.dish-name {
+  transition: color 0.2s;
+}
+
+.menu-row:hover .dish-name {
+  color: var(--primary);
+}
+
+.dish-modal-header {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.dish-image-container {
+  flex: 0 0 200px;
+}
+
+#dishImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.image-placeholder i {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.dish-info {
+  flex: 1;
+}
+
+.dish-servings {
+  border-top: 2px solid #f1f5f9;
+  padding-top: 20px;
+}
+
+.dish-servings h3 {
+  color: var(--primary);
+  margin: 0 0 15px 0;
+  font-size: 18px;
+}
+
+.servings-list {
+  display: grid;
+  gap: 10px;
+}
+
+.serving-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.serving-size {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.serving-price {
+  font-weight: 700;
+  color: var(--green);
+  font-size: 16px;
+}
+
+.price-range {
+  font-weight: 600;
+  color: var(--green);
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    margin: 10% auto;
+    padding: 20px;
+    width: 95%;
+  }
+  
+  .dish-modal-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .dish-image-container {
+    flex: none;
+  }
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Upload Images - {{ resto.name }}{% endblock %}
+{% block top_action %}
+<a class="btn ghost" href="{% url 'admin-restaurant-images' resto.id %}">Back</a>
+<a class="btn ghost" href="{% url 'admin-logout' %}">Logout</a>
+{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <h1>Upload Images</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>Select one or more images</label>
+    <input type="file" name="images" accept="image/*" multiple required>
+    <div style="display:flex;gap:12px;margin-top:14px">
+      <button class="btn primary" type="submit">Upload</button>
+      <a class="btn" href="{% url 'admin-restaurant-images' resto.id %}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+

@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Main{% endblock %}
+{% block top_action %}
+<a class="btn ghost" href="{% url 'logout' %}" id="logoutBtn">
+    <i class="fas fa-sign-out-alt"></i> Logout
+</a>
+{% endblock %}
+{% block content %}
+<!-- Hero Section with Enhanced Design -->
+<section class="main-hero">
+    <h1>Foodie Finder</h1>
+    <p class="hero-subtitle">
+        Welcome back, <strong>{{ request.user.first_name|default:request.user.username }}</strong>!<br>
+        Discover the best restaurants and satisfy your cravings around Naval Proper.
+    </p>
+    <form class="search" action="{% url 'search-results' %}" method="get" autocomplete="off">
+        <div class="search-wrapper">
+            <input id="searchBox" type="text" name="q" placeholder="Search for dishes, restaurants, or cuisines..." required>
+            <button class="btn primary" type="submit">
+                <i class="fas fa-search"></i> <span>Search Now</span>
+            </button>
+        </div>
+        <ul id="suggestions" class="suggestions"></ul>
+    </form>
+</section>
+
+<!-- Inspirational Quotes Section -->
+<section class="quotes">
+    <div class="quote">
+        <i class="quote-icon fas fa-quote-left"></i>
+        <p class="quote-text">Good food is all the sweeter when shared with good friends.</p>
+        <div class="quote-emoji">🍔</div>
+    </div>
+    <div class="quote">
+        <i class="quote-icon fas fa-quote-left"></i>
+        <p class="quote-text">Discover your favorite dishes with ease and convenience.</p>
+        <div class="quote-emoji">🍕</div>
+    </div>
+    <div class="quote">
+        <i class="quote-icon fas fa-quote-left"></i>
+        <p class="quote-text">Cravings don't wait—neither should you. Order now!</p>
+        <div class="quote-emoji">🍜</div>
+    </div>
+</section>
+
+<!-- Featured Restaurants Section -->
+<section class="featured-section">
+    <div class="section-header">
+        <h2><i class="fas fa-star"></i> Featured Restaurants in Naval Proper</h2>
+        <p class="section-subtitle">Handpicked selections just for you</p>
+    </div>
+    
+    <div class="filter-bar">
+        <span class="filter-label"><i class="fas fa-filter"></i> Filter by Category:</span>
+        <button class="btn filter-chip-primary" data-filter="all">
+            <i class="fas fa-th"></i> All Restaurants
+        </button>
+        {% for cat in categories %}
+            <button class="btn filter-chip" data-filter="{{ cat }}">
+                {% if cat == 'Fast Food' %}🍔{% elif cat == 'Seafood' %}🍤{% elif cat == 'Dessert' %}🍰{% elif cat == 'Asian' %}🍜{% elif cat == 'Diner' %}🥪{% else %}{% endif %} {{ cat }}
+            </button>
+        {% endfor %}
+    </div>
+    <div class="grid cards" id="restaurantGrid">
+        {% for r in featured %}
+        <article class="restaurant-card" data-category="{{ r.category }}">
+            <a href="{% url 'restaurant-detail' r.pk %}" class="restaurant-card-link">
+                <div class="restaurant-card-thumb" style="background-image:url('{% if r.thumbnail %}{{ r.thumbnail.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}')">
+                    <div class="card-overlay">
+                        <i class="fas fa-eye view-icon"></i>
+                    </div>
+                </div>
+                <div class="restaurant-card-body">
+                    <h3 class="restaurant-card-title">{{ r.name }}</h3>
+                    <p class="restaurant-card-location">
+                        <i class="fas fa-map-marker-alt"></i> {{ r.location }}
+                    </p>
+                    <div class="restaurant-card-meta">
+                        {% if r.is_open_now %}
+                            <span class="badge open">
+                                <i class="fas fa-check-circle"></i> Open Now
+                            </span>
+                        {% else %}
+                            <span class="badge closed">
+                                <i class="fas fa-times-circle"></i> Closed
+                            </span>
+                        {% endif %}
+                        <span class="badge cat">
+                            {% if r.category == 'Fast Food' %}🍔{% elif r.category == 'Seafood' %}🍤{% elif r.category == 'Dessert' %}🍰{% elif r.category == 'Asian' %}🍜{% elif r.category == 'Diner' %}🥪{% else %}{% endif %} {{ r.category }}
+                        </span>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Menu Preview Section -->
+            <div class="restaurant-menu-preview">
+                <h5 class="restaurant-menu-heading">
+                    <i class="fas fa-utensils"></i> Menu Highlights
+                </h5>
+                {% if r.dishes.all %}
+                    <div class="restaurant-menu-list">
+                        {% for dish in r.dishes.all|slice:":4" %}
+                        <div class="restaurant-menu-item">
+                            <div class="menu-item-info">
+                                <span class="restaurant-menu-name">{{ dish.name }}</span>
+                                {% if dish.dish_category %}
+                                    <span class="restaurant-menu-tag">{{ dish.dish_category }}</span>
+                                {% endif %}
+                            </div>
+                            <span class="restaurant-menu-price">₱{{ dish.price }}</span>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if r.dishes.count > 4 %}
+                        <div class="restaurant-menu-more">
+                            <a href="{% url 'restaurant-detail' r.pk %}">
+                                <i class="fas fa-plus-circle"></i>
+                                View {{ r.dishes.count|add:"-4" }} more dish{{ r.dishes.count|add:"-4"|pluralize:"es" }}
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p class="restaurant-menu-empty">
+                        <i class="fas fa-concierge-bell"></i> Menu coming soon...
+                    </p>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    
+    <!-- Empty State -->
+    {% if featured|length == 0 %}
+    <div class="empty-state">
+        <i class="fas fa-store-slash"></i>
+        <h3>No Restaurants Available</h3>
+        <p>We're working hard to bring you the best restaurants in Naval Proper.<br>Check back soon!</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+// ====================================
+// Search Autocomplete Functionality
+// ====================================
+const searchBox = document.getElementById('searchBox');
+const suggestionList = document.getElementById('suggestions');
+
+if (searchBox && suggestionList) {
+    // Fetch suggestions as user types
+    searchBox.addEventListener('input', async (e) => {
+        const query = searchBox.value.trim();
+        
+        if (!query) {
+            suggestionList.innerHTML = '';
+            return;
+        }
+        
+        try {
+            const response = await fetch(`{% url 'suggest-foods' %}?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            if (data.suggestions && data.suggestions.length > 0) {
+                suggestionList.innerHTML = data.suggestions
+                    .map(s => `<li class='suggest-item'><i class="fas fa-search"></i> ${s}</li>`)
+                    .join('');
+            } else {
+                suggestionList.innerHTML = '';
+            }
+        } catch (error) {
+            console.error('Error fetching suggestions:', error);
+            suggestionList.innerHTML = '';
+        }
+    });
+    
+    // Handle suggestion selection
+    suggestionList.addEventListener('click', (e) => {
+        const item = e.target.closest('.suggest-item');
+        if (item) {
+            searchBox.value = item.textContent.trim();
+            suggestionList.innerHTML = '';
+            searchBox.focus();
+        }
+    });
+    
+    // Close suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchBox.contains(e.target) && !suggestionList.contains(e.target)) {
+            suggestionList.innerHTML = '';
+        }
+    });
+}
+
+// ====================================
+// Category Filter Functionality
+// ====================================
+const filterButtons = document.querySelectorAll('[data-filter]');
+const restaurantCards = document.querySelectorAll('.restaurant-card');
+
+filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const filterValue = button.getAttribute('data-filter');
+        
+        // Update active button state
+        filterButtons.forEach(btn => {
+            btn.classList.remove('filter-chip-primary');
+            btn.classList.add('filter-chip');
+        });
+        button.classList.remove('filter-chip');
+        button.classList.add('filter-chip-primary');
+        
+        // Filter restaurant cards with animation
+        restaurantCards.forEach(card => {
+            const category = card.getAttribute('data-category');
+            const shouldShow = filterValue === 'all' || category === filterValue;
+            
+            if (shouldShow) {
+                card.style.display = 'block';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
+            }
+        });
+    });
+});
+
+// ====================================
+// Smooth Scroll Behavior
+// ====================================
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+
+// ====================================
+// Logout Confirmation Dialog
+// ====================================
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent immediate logout
+            
+            // Create confirmation dialog
+            const confirmDialog = document.createElement('div');
+            confirmDialog.className = 'logout-confirmation-overlay';
+            confirmDialog.innerHTML = `
+                <div class="logout-confirmation-dialog">
+                    <div class="logout-dialog-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Confirm Logout</h3>
+                    </div>
+                    <div class="logout-dialog-body">
+                        <p>Are you sure you want to log out?</p>
+                        <p class="logout-dialog-subtitle">You will be redirected to the login page.</p>
+                    </div>
+                    <div class="logout-dialog-actions">
+                        <button class="btn logout-btn-no">
+                            <i class="fas fa-times"></i> No, Stay
+                        </button>
+                        <button class="btn logout-btn-yes">
+                            <i class="fas fa-check"></i> Yes, Logout
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Add to body
+            document.body.appendChild(confirmDialog);
+            
+            // Add animation
+            setTimeout(() => {
+                confirmDialog.classList.add('show');
+            }, 10);
+            
+            // Handle button clicks
+            const noBtn = confirmDialog.querySelector('.logout-btn-no');
+            const yesBtn = confirmDialog.querySelector('.logout-btn-yes');
+            
+            noBtn.addEventListener('click', function() {
+                confirmDialog.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(confirmDialog);
+                }, 300);
+            });
+            
+            yesBtn.addEventListener('click', function() {
+                // Show loading state
+                yesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+                yesBtn.disabled = true;
+                
+                // Redirect to logout after short delay
+                setTimeout(() => {
+                    window.location.href = logoutBtn.href;
+                }, 500);
+            });
+            
+            // Close on overlay click
+            confirmDialog.addEventListener('click', function(e) {
+                if (e.target === confirmDialog) {
+                    confirmDialog.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(confirmDialog);
+                    }, 300);
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

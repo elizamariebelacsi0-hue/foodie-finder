@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ mode }} Dish{% endblock %}
+{% block top_action %}
+<a class="btn ghost" href="{% url 'admin-dish-list' %}">Back</a>
+<a class="btn ghost" href="{% url 'admin-logout' %}">Logout</a>
+{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <h1>{{ mode }} Dish</h1>
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="full">
+        <label>Name</label>
+        {{ form.name }}
+      </div>
+      <div class="full">
+        <label>Restaurant</label>
+        {{ form.restaurant }}
+      </div>
+      <div class="full">
+        <label>Image</label>
+        {{ form.image }}
+        {% if dish and dish.image %}
+          <div style="margin-top:8px">
+            <img src="{{ dish.image.url }}" alt="Current image" style="max-width:150px;border-radius:6px">
+          </div>
+        {% endif %}
+      </div>
+      <div class="full">
+        <label>Categories</label>
+        {{ form.categories }}
+      </div>
+      <div class="full">
+        <label>Description</label>
+        {{ form.description }}
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:14px">
+      <button class="btn primary" type="submit">Save</button>
+      <a class="btn" href="{% url 'admin-dish-list' %}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
