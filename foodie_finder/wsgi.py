@@ -11,6 +11,10 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'foodie_finder.settings')
+# Use production settings if RENDER environment variable is present
+if 'RENDER' in os.environ:
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'foodie_finder.settings_production')
+else:
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'foodie_finder.settings')
 
 application = get_wsgi_application()

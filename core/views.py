@@ -110,14 +110,14 @@ def register_view(request):
                 user.is_active = True  # Admins are auto-approved
             else:
                 profile.role = role
-                user.is_active = False  # Regular users need approval
+                user.is_active = True  # Auto-approve regular users for now
             profile.save()
             user.save()
             
         if email in ADMIN_EMAILS:
             messages.success(request, "Admin account created. You can now log in.")
         else:
-            messages.info(request, "Registration successful. Your account is pending admin approval.")
+            messages.success(request, "Registration successful! You can now log in.")
         return redirect('login')
 
     return render(request, 'register.html')
